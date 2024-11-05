@@ -42,18 +42,10 @@ export async function POST(request: Request) {
       })
     );
 
-    // Write full extracted content to debug files
-    await writeDebugFile(`topic1_full.txt`, topic1Texts.join('\n'), ts);
-    await writeDebugFile(`topic2_full.txt`, topic2Texts.join('\n'), ts);
-
     // Combine and truncate texts to fit context window (roughly 4000 tokens)
     const maxChars = 36000; // Approximate 4000 tokens
     const topic1Content = topic1Texts.join('\n').slice(0, maxChars);
     const topic2Content = topic2Texts.join('\n').slice(0, maxChars);
-
-    // Write truncated content to debug files
-    await writeDebugFile(`topic1_truncated.txt`, topic1Content, ts);
-    await writeDebugFile(`topic2_truncated.txt`, topic2Content, ts);
 
     // Create system prompts for each topic
     const topic1SystemPrompt = `Answer the following prompt about ${topic1.name} using only the provided content as reference:
@@ -69,10 +61,6 @@ export async function POST(request: Request) {
     ${topic2Content}
     
     Prompt: ${prompt}`;
-
-    // Write system prompts to debug files
-    await writeDebugFile(`topic1_system_prompt.txt`, topic1SystemPrompt, ts);
-    await writeDebugFile(`topic2_system_prompt.txt`, topic2SystemPrompt, ts);
 
     // Send separate requests for each topic
     const [topic1Response, topic2Response] = await Promise.all([
@@ -96,10 +84,6 @@ export async function POST(request: Request) {
 
     const topic1ResponseContent = topic1Response.choices[0].message?.content || '';
     const topic2ResponseContent = topic2Response.choices[0].message?.content || '';
-
-    // Write API response to debug file
-    await writeDebugFile(`api_response_1.txt`, topic1ResponseContent, ts);
-    await writeDebugFile(`api_response_2.txt`, topic2ResponseContent, ts);
 
     const diffResponse = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
