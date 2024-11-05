@@ -8,22 +8,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function writeDebugFile(filename: string, content: string, ts: string) {
-  const debugDir = path.join(process.cwd(), 'debug', ts);
-  try {
-    // Create debug directory if it doesn't exist
-    await fs.mkdir(debugDir, { recursive: true });
-    await fs.writeFile(path.join(debugDir, filename), content);
-  } catch (error) {
-    console.error(`Error writing debug file ${filename}:`, error);
-  }
-}
-
 export async function POST(request: Request) {
   try {
     const { topic1, topic2, prompt } = await request.json();
-
-    const ts = Date.now().toString()
 
     // Extract text content from URLs for both topics
     const topic1Texts = await Promise.all(
